@@ -1,0 +1,16 @@
+# Cloudflare Workers — QuiltCraft stitch export
+# Deploy: wrangler deploy (from /workers directory)
+
+name = "quiltcraft-export"
+main = "workers/export-worker.js"
+compatibility_date = "2024-01-01"
+account_id = "1ff19412d1847efacd130922e6d6fd92"
+
+[vars]
+# Set GOOGLE_OAUTH_TOKEN in the Cloudflare dashboard (not here)
+# Dashboard → Workers → quiltcraft-export → Settings → Variables
+
+[[routes]]
+# Uncomment after Pages is live and you have a custom domain:
+# pattern = "quiltcraft.pages.dev/api/*"
+# zone_name = "pages.dev"

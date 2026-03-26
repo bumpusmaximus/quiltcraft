@@ -1,0 +1,12 @@
+{
+  "name": "quiltcraft",
+  "version": "1.0.0",
+  "description": "Mobile-first quilt block designer with machine stitch file export",
+  "scripts": {
+    "dev": "npx serve . -p 4200 --no-clipboard",
+    "worker:dev": "npx wrangler dev workers/export-worker.js --port 8787",
+    "worker:deploy": "npx wrangler deploy"
+  },
+  "keywords": ["quilting", "embroidery", "stitch", "cloudflare-workers"],
+  "license": "MIT"
+}
