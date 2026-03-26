@@ -10,7 +10,7 @@ account_id = "1ff19412d1847efacd130922e6d6fd92"
 # Set GOOGLE_OAUTH_TOKEN in the Cloudflare dashboard (not here)
 # Dashboard → Workers → quiltcraft-export → Settings → Variables
 
-[[routes]]
-# Uncomment after Pages is live and you have a custom domain:
+# Routes: add after Pages is live and you have a custom domain
+# [[routes]]
 # pattern = "quiltcraft.pages.dev/api/*"
 # zone_name = "pages.dev"
