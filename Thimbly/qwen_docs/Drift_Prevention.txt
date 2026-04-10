@@ -1,0 +1,1 @@
+[PRO] Review all generated files against Thimbly CP1 constraints. Report any deviations from RLS, idempotency, or grid performance requirements.

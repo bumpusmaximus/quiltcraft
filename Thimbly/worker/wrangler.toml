@@ -1,0 +1,22 @@
+name = "thimbly-worker"
+main = "src/index.ts"
+compatibility_date = "2024-04-01"
+nodejs_compat = true  # 👈 REQUIRED for stripe-node
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "f91b39ff3aac4832b15dfce82d21eb0a"
+preview_id = "16a625c1edde4ab592c1153888237717"
+
+[[r2_buckets]]
+binding = "EXPORTS_BUCKET"
+bucket_name = "thimbly-exports"
+preview_bucket_name = "thimbly-exports-preview"
+
+[vars]
+SUPABASE_URL = "https://fzujzbyqcwplqmfxipwp.supabase.co"
+SUPABASE_ANON_KEY = "<ANON_KEY>"
+SUPABASE_SERVICE_ROLE_KEY = "<SERVICE_KEY>"
+STRIPE_WEBHOOK_SECRET = "whsec_<YOUR_SECRET>"
+STRIPE_SECRET_KEY = "sk_test_<YOUR_KEY>"
+SYSTEM_ADMIN_ID = "00000000-0000-0000-0000-000000000000"

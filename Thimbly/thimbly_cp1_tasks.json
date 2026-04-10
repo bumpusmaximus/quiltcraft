@@ -1,0 +1,53 @@
+{
+  "project": "Thimbly",
+  "phase": "CP1_Grid_Foundation",
+  "stack": "Cloudflare+Supabase+Antigravity",
+  "tasks": [
+    {
+      "id": "01_SUPABASE_FOUNDATION",
+      "model": "[PRO]",
+      "file": "docs/01_TASK_SUPABASE_FOUNDATION.md",
+      "prompt": "[PRO] Generate a single Supabase SQL migration file for Thimbly CP1 that creates: user_credits, credit_transactions, user_roles, projects tables with strict RLS. Include handle_new_user() trigger, grant_credits() SECURITY DEFINER RPC with idempotency & negative balance protection, and indexes. Output: single .sql file with comments. Validate: no direct writes to credits, all ops via RPC.",
+      "expected_output": "supabase/migrations/20240407000001_thimbly_cp1_foundation.sql",
+      "validation": ["RLS blocks cross-user SELECT", "RPC rejects non-admin grants", "Idempotency prevents duplicate transactions"],
+      "depends_on": []
+    },
+    {
+      "id": "02_WORKER_SKELETON",
+      "model": "[PRO]",
+      "file": "docs/02_TASK_WORKER_SKELETON.md",
+      "prompt": "[PRO] Generate Cloudflare Worker (Hono) with: POST /api/auth/session, GET /api/credits/balance, POST /api/exports/validate, POST /api/exports/complete, POST /api/webhooks/stripe. Include JWT verification, KV rate limiting (10 req/min), idempotency headers, Stripe signature verification, and R2 export stubs. Output: worker/src/index.ts, wrangler.toml, .env.example, lib/*.ts, tests/*.test.ts",
+      "expected_output": "worker/src/index.ts, worker/tests/*.test.ts",
+      "validation": ["401 on invalid JWT", "rejects export when balance<1", "webhook rejects bad signatures"],
+      "depends_on": ["01_SUPABASE_FOUNDATION"]
+    },
+    {
+      "id": "03_GRID_ENGINE",
+      "model": "[FLASH]",
+      "file": "docs/03_TASK_GRID_ENGINE.md",
+      "prompt": "[FLASH] Build React+Canvas grid engine: GridEngine.tsx with zoom/pan, 60fps dirty-rect rendering, CraftRules interface (CrossStitch, Quilt, Knit), DMC 117 palette lock, Zustand store, undo/redo (50 steps), watermark export stub. Output: frontend/src/components/GridEngine/*, store/useGridStore.ts, utils/palettes/dmc-117.ts, config/crafts.ts",
+      "expected_output": "frontend/src/components/GridEngine/*, frontend/src/store/*",
+      "validation": ["500x500 grid @60fps", "ΔE<3 color accuracy", "undo/redo memory stable"],
+      "depends_on": []
+    },
+    {
+      "id": "04_INTEGRATION_FLOW",
+      "model": "[PRO]",
+      "file": "docs/04_TASK_INTEGRATION_FLOW.md",
+      "prompt": "[PRO] Wire Supabase Auth → Frontend session → Credit deduction → Export pipeline → Stripe checkout. Implement useAuth, useCredits, useExport hooks, UpgradeModal, ExportProgress, Worker checkout routes, and Stripe webhook handler. Output: frontend hooks/components, worker checkout/webhook routes, Playwright E2E tests",
+      "expected_output": "frontend/src/hooks/*, worker/src/routes/checkout.ts, tests/e2e/*",
+      "validation": ["Login→design→free export→deduct credit→upgrade→paid export works end-to-end"],
+      "depends_on": ["01_SUPABASE_FOUNDATION", "02_WORKER_SKELETON", "03_GRID_ENGINE"]
+    }
+  ],
+  "validation_protocol": {
+    "hard_stop_rules": "Pause if ≥2 criteria fail. Fix in hotfix branch, retest, merge only when 100% green.",
+    "commands": [
+      "npm run test:rls",
+      "npm run test:credits",
+      "npm run perf:grid",
+      "npm run audit:deps",
+      "npm run test:e2e"
+    ]
+  }
+}

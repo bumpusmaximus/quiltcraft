@@ -1,0 +1,49 @@
+[PRO] Wire together Supabase Auth → Frontend session → Credit deduction → Export pipeline for Thimbly CP1:
+
+1. Auth Flow:
+- frontend/src/lib/supabase.ts: Initialize Supabase client with project URL + anon key
+- frontend/src/hooks/useAuth.ts: Custom hook that returns session, user, role, signIn/signOut
+- Protect routes: /editor, /exports require auth; redirect to /login otherwise
+
+2. Credit Integration:
+- frontend/src/hooks/useCredits.ts: Fetch balance on mount, expose deductCredit() that calls Worker /api/exports/validate
+- Handle errors: Insufficient credits → show upgrade modal; network error → retry with exponential backoff
+- Optimistic UI: Show credit deduction immediately, revert on failure
+
+3. Export Flow:
+- User clicks "Export PDF" → Check credits via useCredits hook
+- If balance >=1: Call Worker /api/exports/validate with idempotency key
+- On success: Show progress modal → Call /api/exports/complete → Download signed R2 URL
+- On failure: Revert credit, show error message with support link
+
+4. Stripe Checkout Stub:
+- frontend/src/components/UpgradeModal.tsx: Show credit packs ($2/1, $5/3, $15/10)
+- On purchase: Call Worker /api/checkout/create-session → Redirect to Stripe Checkout
+- Webhook: Worker updates Supabase credits on successful payment (test mode: use Stripe CLI)
+
+5. Error Handling:
+- Global error boundary: Catch React errors, log to Sentry with craft/context metadata
+- Network retries: Use axios/fetch with retry logic for transient failures
+- Fallback states: Show skeleton loaders while fetching credits/projects
+
+Output:
+- frontend/src/lib/supabase.ts (client init + RLS helpers)
+- frontend/src/hooks/useAuth.ts, useCredits.ts, useExport.ts
+- frontend/src/components/UpgradeModal.tsx, ExportProgress.tsx
+- worker/src/routes/checkout.ts (Stripe session creation)
+- worker/src/webhooks/stripe.ts (payment success handler)
+
+Validate end-to-end:
+1. Login with test user (balance=1)
+2. Create simple cross-stitch design
+3. Click "Export PDF" → Credit deducts → Download watermarked PDF
+4. Try second export → Insufficient credits modal appears
+5. Purchase credit pack via Stripe test mode → Balance updates → Export succeeds
+
+[FLASH] Generate Playwright E2E tests for the above flow:
+- tests/e2e/auth-flow.spec.ts: Login/signup
+- tests/e2e/credit-export.spec.ts: Free export → deduction → upgrade → paid export
+- tests/e2e/rls-security.spec.ts: Verify User A cannot access User B's projects
+- Run command: npm run test:e2e
+
+[CONTINUE] If output is truncated, respond with "##CONTINUED##" and resume exactly where you left off. Do not summarize.

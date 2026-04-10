@@ -1,0 +1,1 @@
+[PRO] Re-validate this SQL against Supabase RLS documentation. Ensure no direct table writes are possible for credit operations.

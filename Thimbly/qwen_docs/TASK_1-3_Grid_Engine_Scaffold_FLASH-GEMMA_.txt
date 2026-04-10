@@ -1,0 +1,52 @@
+[FLASH] Generate a React + Canvas/WebGL grid engine for Thimbly CP1 with:
+
+1. Core Component: `GridEngine.tsx`
+- Props: craftType ('cross_stitch' | 'quilt' | 'knit'), gridSize ({width, height}), palette (ColorRef[]), initialData (optional)
+- Features: Zoom (wheel/pinch), pan (drag), cell click/drag to place stitches, undo/redo stack (max 50 steps)
+- Performance: Render 500x500 grid at 60fps using requestAnimationFrame + dirty rectangle optimization
+- Accessibility: Keyboard navigation (arrow keys), ARIA labels for cells, high-contrast mode toggle
+
+2. Craft Rule Injection:
+- Abstract `CraftRules` interface with methods: getCellSymbol(), getCellColor(), validatePlacement()
+- Implementations: CrossStitchRules (DMC symbols), QuiltRules (seam allowance overlay, fabric swatch preview), KnitRules (stitch symbols, row counter)
+- Rules injected via props; GridEngine remains agnostic
+
+3. Palette System:
+- DMC 117 color lock: Hardcode hex values from official chart (no AI generation)
+- Color picker: Show only approved palette; display ΔE difference on hover
+- Unified color model: {id: 'DMC:310', hex: '#000000', name: 'Black', perceptual_hash: '...'}
+
+4. Export Stub:
+- Button: "Export Preview" → generates watermarked PNG via html2canvas
+- Button: "Export PDF" → stub that opens modal with subscription gating
+- Watermark: Semi-transparent "Thimbly Preview" + user email, positioned randomly per export
+
+5. State Management:
+- Zustand store: gridData (2D array of CellState), history (undo/redo), viewport (zoom/pan), activeTool
+- Persist to localStorage for offline recovery
+- Sync to Supabase projects table on save (debounced 2s)
+
+6. Styling:
+- Tailwind CSS + shadcn/ui components
+- Light/dark mode toggle (persist preference)
+- Responsive: Desktop-first, tablet-compatible (min width 768px)
+
+Output:
+- frontend/src/components/GridEngine/GridEngine.tsx
+- frontend/src/components/GridEngine/CraftRules/*.ts
+- frontend/src/store/useGridStore.ts
+- frontend/src/utils/palettes/dmc-117.ts
+- frontend/src/lib/export.ts (watermark + PNG/PDF stubs)
+- frontend/tailwind.config.js updates for craft-specific colors
+
+Validate:
+- 500x500 grid renders at 60fps on mid-tier laptop (Chrome DevTools performance tab)
+- DMC color selection matches official hex values exactly
+- Undo/redo works for 50 steps without memory leak
+- Export preview includes watermark and is downloadable
+
+[GEMMA] Generate a simple config file: frontend/src/config/crafts.ts with:
+- Craft metadata (name, icon, default grid size, supported palettes)
+- Feature flags (enableQuiltSeamMath: true, enableKnitGauge: false for CP1)
+
+[CONTINUE] If output is truncated, respond with "##CONTINUED##" and resume exactly where you left off. Do not summarize.

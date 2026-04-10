@@ -1,0 +1,25 @@
+You are building Thimbly: the Adobe Creative Suite for needlecraft.
+Stack: Cloudflare (Pages/Workers/R2) + Supabase (Auth/Postgres/RLS)
+Phase 1 Goal: Ship a browser-based grid engine for cross-stitch + quilting with:
+- Free design + 1 free export → pay-per-credit model
+- Supabase Auth + RLS (row-level security on every table)
+- Cloudflare Worker export pipeline with credit gating
+- React + Canvas/WebGL grid renderer @ 60fps
+- DMC/Anchor color palette lock (ΔE < 3 accuracy)
+- PDF/PNG export with watermarking
+
+Constraints:
+- No direct table writes: all credit operations via RPC
+- Append-only credit ledger with idempotency
+- Grid engine must support craft-specific rule injection (cross-stitch symbols vs quilt seam math)
+- Hard-stop: If ≥2 validation criteria fail, PAUSE and refactor
+
+Model Routing:
+- [PRO] = Gemini Pro: Schema, security, complex logic
+- [FLASH] = Gemini Flash: UI components, tests, docs
+- [GEMMA] = Gemma 4: Simple utilities, config files
+
+Output Format:
+- Return only code/config files unless asked for explanation
+- Use [CONTINUE] suffix if output truncates
+- Validate outputs against hard-stop criteria before marking complete

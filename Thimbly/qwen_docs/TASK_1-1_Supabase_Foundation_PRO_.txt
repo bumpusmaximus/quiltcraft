@@ -1,0 +1,35 @@
+[PRO] Generate a single Supabase SQL migration file for Thimbly CP1 that creates:
+
+1. Core Tables:
+- `user_credits`: user_id (uuid, PK, ref auth.users), balance (int, default 1, check >=0), updated_at
+- `credit_transactions`: id (uuid, PK), user_id, amount (int), reason (enum: tester_comp/creator_bonus/promo_referral/manual_adjust/refund/system_grant), granted_by (uuid), metadata (jsonb), idempotency_key (text, unique), created_at
+- `user_roles`: user_id (uuid, PK), role (enum: admin/ops/tester/creator/user, default 'user'), created_at
+- `projects`: id (uuid, PK), user_id, name, craft_type (enum: cross_stitch/quilt/knit), grid_data (jsonb), unified_palette (jsonb), is_published (bool, default false), created_at, updated_at
+
+2. Triggers:
+- `handle_new_user()`: Auto-insert into user_credits (balance=1) and user_roles on auth.users insert
+
+3. RLS Policies (enable RLS on all tables):
+- user_credits: SELECT allowed for owner only; no direct INSERT/UPDATE/DELETE
+- credit_transactions: SELECT allowed for owner + admins/ops; INSERT only via RPC
+- user_roles: SELECT/UPDATE only for admin role
+- projects: SELECT allowed for owner OR if is_published=true; INSERT/UPDATE only for owner
+
+4. Secure RPC Function:
+- `grant_credits(p_user_id, p_amount, p_reason, p_granted_by, p_metadata, p_idempotency_key)`: 
+  * SECURITY DEFINER
+  * Validates grantor has admin/ops role
+  * Checks idempotency_key for duplicates
+  * Prevents negative balance on deductions
+  * Atomic insert to credit_transactions + update to user_credits
+  * Returns JSONB with status/new_balance/transaction_id
+
+5. Indexes:
+- credit_transactions(user_id, created_at)
+- projects(user_id, craft_type)
+- user_roles(role)
+
+Output: Single .sql file with comments, RLS policies, and index recommendations.
+Validate: No direct UPDATE on credits table; all writes go through RPC or Edge Function.
+
+[CONTINUE] If output is truncated, respond with "##CONTINUED##" and resume exactly where you left off. Do not summarize.
